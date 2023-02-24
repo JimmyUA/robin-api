@@ -1,6 +1,3 @@
-import {generateHeaders} from "../utils/generateHeaders";
-import RobotsContract from "./contract/Robots.json";
-import RobotStaminaContract from "./contract/RobotsStamina.json";
 import Web3 from "web3";
 
 const targetPrivateKey = process.env.TARGET_PRIVATE_KEY || '83f88c9e19326d20b178bf5efb9d1ee92e59b69733b7ee766552797fe2e2f28c';

